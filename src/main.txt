@@ -1,0 +1,47 @@
+package main
+
+import (
+	"encoding/xml"
+	"flag"
+	"fmt"
+	"go_project/cats"
+	"go_project/colors"
+	"go_project/stream"
+	"go_project/validator"
+)
+
+func flagReadCommandLine(key string, defaultValue string, helpInfo string) string {
+	var config = flag.String(key, defaultValue, helpInfo)
+	flag.Parse()
+	return *config
+}
+
+func main() {
+	//	config:=flagReadCommandLine("fileName","configXML.xml","set config file name")
+	var config = flag.String("fileName", "configXML.xml", "set config file name")
+	flag.Parse()
+	content := stream.ReadFile(*config)
+	var data Cats.Cats
+	err := xml.Unmarshal(content, &data)
+	stream.Catch(err)
+
+	fmt.Println(data)
+
+	validator.TestHealthAllCats(data)
+
+	fmt.Println()
+	var colorFlag = flag.String("colorFileName", "colors.xml", "set color config file name")
+	colorsFile := stream.ReadFile(*colorFlag)
+	var ProgrammColors colors.Colors
+	err = xml.Unmarshal(colorsFile, &ProgrammColors)
+	stream.Catch(err)
+
+	validator.TestColorAllCats(data, ProgrammColors)
+	CatsTest := validator.GetListCatValidatorResult(data, ProgrammColors)
+	stream.WriteStringArrayToFile(CatsTest, "C:/go_projects/src/go_project/cats.txt")
+
+	//	stream.WriteStringToFile("This is sparta", "C:/go_projects/src/go_project/cats.txt")
+	//	stream.Pause()
+}
+
+http://eax.me/go-databases/

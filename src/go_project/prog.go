@@ -1,37 +1,26 @@
 package main
+
 import (
 	"fmt"
-	"encoding/xml"
-	"flag"
+	"go_project/DB"
+	"go_project/dbService"
+	"go_project/pavilions"
+	"go_project/shelters"
 	"go_project/stream"
-	"go_project/cats"
-	"go_project/validator"
-	"go_project/colors"
 )
 
-func flagReadCommandLine(key string, defaultValue string, helpInfo string) string{
-	var config = flag.String(key, defaultValue, helpInfo)
-	flag.Parse()
-	return *config
-}
-
 func main() {
-//	config:=flagReadCommandLine("fileName","configXML.xml","set config file name")
-	var config = flag.String("fileName","configXML.xml","set config file name")
-	flag.Parse()
-	content := stream.ReadFile(*config)
-	var data Cats.Cats
-	xml.Unmarshal(content, &data)
-	fmt.Println(data)
-
-	validator.TestAgeAllCats(data)
+	db, err := DB.Connect("localhost", "5432", "postgres", "22821810", "laba", "disable")
+	var pavilions []pavilions.Pavilion
+	pavilions, err = dbService.SelectAllPavilions(db)
+	defer db.Close()
+	stream.Catch(err)
+	fmt.Println(pavilions)
 
 	fmt.Println()
-	var colorFlag = flag.String("colorFileName","colors.xml","set color config file name")
-	colorsFile := stream.ReadFile(*colorFlag)
-	var ProgrammColors colors.Colors
-	xml.Unmarshal(colorsFile, &ProgrammColors)
 
-	validator.TestColorAllCats(data ,ProgrammColors)
-//	stream.Pause()
+	var shelters []shelters.Shelter
+	shelters, err = dbService.SelectAllShelters(db)
+	stream.CatchF(err)
+	fmt.Println(shelters)
 }

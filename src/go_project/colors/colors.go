@@ -1,3 +1,4 @@
+//пакет предназначен для представления коллекций цветов
 package colors
 import (
 	"encoding/xml"
